@@ -1,0 +1,43 @@
+# Secrets & personal data — never commit
+.env
+.env.*
+secrets/
+data/
+backups/
+*.sqlite3
+*.sqlite3-*
+*.sqlite
+*.db
+*.pem
+*.key
+*.p12
+*.pfx
+*.pdf
+*.csv
+*.xls
+*.xlsx
+*.har
+*token*.txt
+CLAUDE.local.md
+
+# Python / tooling
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+requirements-runtime.txt
+scan.log
+history.log
+
+# OS / editors
+.DS_Store
+Thumbs.db
+desktop.ini
+.vscode/
+.idea/
+
+# Claude Code: personal settings stay local
+.claude/settings.local.json
