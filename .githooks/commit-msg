@@ -1,0 +1,7 @@
+#!/bin/sh
+# Blocks commit messages that contain secrets or personal data (fails closed).
+out=$(python3 scripts/secret_scan.py --message "$1") || { echo "$out"; exit 1; }
+case "$out" in
+  "secret-scan: OK"*) ;;
+  *) echo "commit-msg: secret scanner did not confirm OK — commit blocked."; exit 1 ;;
+esac

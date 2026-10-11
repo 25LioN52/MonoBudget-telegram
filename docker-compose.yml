@@ -1,0 +1,51 @@
+# MonoBudget Telegram bot — docker compose for UGOS Pro (or any Docker host).
+# Put this file, .env and the secrets/ folder in one directory (the compose project).
+# See README.md for step-by-step instructions.
+
+services:
+  monobudget:
+    # Pin a release (e.g. :1.0.0) and update deliberately; verify with
+    #   gh attestation verify oci://ghcr.io/25lion52/monobudget-telegram:<tag> --owner 25LioN52
+    image: ghcr.io/25lion52/monobudget-telegram:1
+    container_name: monobudget
+    restart: unless-stopped
+    # Run as your NAS user so files in ./data belong to you (find ids with `id` over SSH).
+    user: "${PUID:-1000}:${PGID:-1000}"
+    env_file: .env
+    environment:
+      TZ: ${TIMEZONE:-Europe/Madrid}
+      DATA_DIR: /data
+      TELEGRAM_BOT_TOKEN_FILE: /run/secrets/telegram_bot_token
+      MONO_TOKEN_FILE: /run/secrets/mono_token
+    secrets:
+      - telegram_bot_token
+      - mono_token
+    volumes:
+      - ./data:/data
+    # Hardening: no open ports, read-only filesystem, no privileges.
+    read_only: true
+    tmpfs:
+      - /tmp:size=16m,mode=1777
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    mem_limit: 256m
+    pids_limit: 128
+    healthcheck:
+      test: ["CMD", "python", "-m", "monobudget", "healthcheck"]
+      interval: 60s
+      timeout: 10s
+      start_period: 120s
+      retries: 3
+    logging:
+      driver: json-file
+      options:
+        max-size: "5m"
+        max-file: "3"
+
+secrets:
+  telegram_bot_token:
+    file: ./secrets/telegram_bot_token.txt
+  mono_token:
+    file: ./secrets/mono_token.txt

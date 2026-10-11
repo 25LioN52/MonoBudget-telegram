@@ -1,0 +1,71 @@
+{
+  "clientId": "fakeClient01",
+  "name": "Тестовий Користувач",
+  "webHookUrl": "",
+  "permissions": "psfj",
+  "accounts": [
+    {
+      "id": "eurBlackAcc0001",
+      "sendId": "fakesend1",
+      "balance": 123456,
+      "creditLimit": 0,
+      "type": "black",
+      "currencyCode": 978,
+      "cashbackType": "UAH",
+      "maskedPan": [
+        "000000******0001"
+      ],
+      "iban": "UA000000000000000000000000001"
+    },
+    {
+      "id": "eurWhiteAcc0002",
+      "sendId": "fakesend2",
+      "balance": 5000,
+      "creditLimit": 0,
+      "type": "white",
+      "currencyCode": 978,
+      "cashbackType": "UAH",
+      "maskedPan": [
+        "000000******0002"
+      ],
+      "iban": "UA000000000000000000000000002"
+    },
+    {
+      "id": "uahBlackAcc0003",
+      "sendId": "fakesend3",
+      "balance": 990000,
+      "creditLimit": 0,
+      "type": "black",
+      "currencyCode": 980,
+      "cashbackType": "UAH",
+      "maskedPan": [
+        "000000******0003"
+      ],
+      "iban": "UA000000000000000000000000003"
+    },
+    {
+      "id": "usdBlackAcc0004",
+      "sendId": "fakesend4",
+      "balance": 10000,
+      "creditLimit": 0,
+      "type": "black",
+      "currencyCode": 840,
+      "cashbackType": "UAH",
+      "maskedPan": [
+        "000000******0004"
+      ],
+      "iban": "UA000000000000000000000000004"
+    }
+  ],
+  "jars": [
+    {
+      "id": "fakeJar00000001",
+      "sendId": "jarsend1",
+      "title": "На відпустку",
+      "description": "",
+      "currencyCode": 980,
+      "balance": 100000,
+      "goal": 5000000
+    }
+  ]
+}

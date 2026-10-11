@@ -1,0 +1,53 @@
+[project]
+name = "monobudget-telegram"
+version = "1.0.0"
+description = "Self-hosted Telegram bot: weekly and monthly Monobank spending budget with category reports."
+readme = "README.md"
+license = "MIT"
+requires-python = ">=3.13,<3.14"
+dependencies = [
+    # aiogram brings aiohttp, which is also used for the Monobank client (one HTTP stack).
+    "aiogram>=3.20,<4",
+    # IANA time zone data for zoneinfo, independent of the container OS.
+    "tzdata>=2025.2",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=8.4",
+    "pytest-asyncio>=1.1",
+    "ruff>=0.12",
+    "pip-audit>=2.9",
+    "pyyaml>=6.0",
+]
+
+[tool.uv]
+# The app runs from src/ (PYTHONPATH); nothing is built or installed, so no
+# build backend is downloaded. uv.lock pins every package with hashes.
+package = false
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"
+pythonpath = ["src"]
+testpaths = ["tests"]
+addopts = "-ra"
+
+[tool.ruff]
+line-length = 120
+target-version = "py313"
+src = ["src", "tests", "scripts"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "UP", "S", "ASYNC", "RUF", "SIM", "PL"]
+ignore = [
+    "PLR0911", "PLR0912", "PLR0913", "PLR0915", "PLR0917", "PLR2004",  # complexity/magic numbers: readability over rules
+    "PLC0415",  # deliberate lazy imports (lightweight CLI subcommands)
+    "RUF001", "RUF002", "RUF003",                            # Ukrainian text and symbols are intentional
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["S101", "S105", "S106", "S603", "S607", "S108"]  # fake tokens in tests are intentional
+"src/monobudget/i18n.py" = ["E501"]  # translated sentences stay on one line
+"scripts/**" = ["S603", "S607"]
+".claude/hooks/**" = ["S603", "S607"]

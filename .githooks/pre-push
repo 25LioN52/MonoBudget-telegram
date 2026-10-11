@@ -1,0 +1,27 @@
+#!/bin/sh
+# Scans everything about to be pushed — every new commit (file versions and
+# messages) and annotated tag messages — so a secret added and later removed
+# cannot slip into the public history. Fails closed.
+remote="$1"
+zero=0000000000000000000000000000000000000000
+
+check() {
+  case "$1" in
+    "secret-scan: OK"*) echo "$1" ;;
+    *) echo "pre-push: secret scanner did not confirm OK — push blocked."; exit 1 ;;
+  esac
+}
+
+while read -r local_ref local_sha remote_ref remote_sha; do
+  [ "$local_sha" = "$zero" ] && continue # branch deletion
+  if [ "$(git cat-file -t "$local_sha")" = "tag" ]; then
+    # Drop the signature block of signed tags (base64 would look like a token).
+    out=$(git cat-file -p "$local_sha" | sed '/^-----BEGIN .*SIGNATURE-----$/,/^-----END .*SIGNATURE-----$/d' |
+      python3 scripts/secret_scan.py --message -) || { echo "$out"; exit 1; }
+    check "$out"
+  fi
+  # Commits not yet on this remote (other remotes or mirrors don't count).
+  out=$(python3 scripts/secret_scan.py --history "$local_sha" --not --remotes="$remote") || { echo "$out"; exit 1; }
+  check "$out"
+done
+exit 0
