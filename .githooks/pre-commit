@@ -1,0 +1,8 @@
+#!/bin/sh
+# Blocks commits that contain secrets or personal data (fails closed).
+# Enable once per clone:  git config core.hooksPath .githooks
+out=$(python3 scripts/secret_scan.py --staged) || { echo "$out"; exit 1; }
+case "$out" in
+  "secret-scan: OK"*) echo "$out" ;;
+  *) echo "pre-commit: secret scanner did not confirm OK — commit blocked."; exit 1 ;;
+esac

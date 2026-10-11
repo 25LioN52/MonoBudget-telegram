@@ -1,0 +1,71 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "permissions": {
+    "allow": [
+      "Bash(uv run pytest)",
+      "Bash(uv run pytest -q)",
+      "Bash(uv run ruff check .)",
+      "Bash(uv run ruff format --check .)",
+      "Bash(python3 scripts/secret_scan.py --all)",
+      "Bash(python3 scripts/secret_scan.py --staged)",
+      "Bash(python3 scripts/secret_scan.py --history --all)",
+      "Bash(git status:*)",
+      "Bash(git diff:*)",
+      "Bash(git log:*)",
+      "Bash(git show:*)"
+    ],
+    "ask": [
+      "Bash(git push:*)",
+      "Bash(gh pr merge:*)",
+      "Bash(gh release:*)",
+      "Bash(gh repo edit:*)",
+      "Bash(gh api:*)",
+      "Bash(uv add:*)",
+      "Bash(uv lock:*)",
+      "Bash(docker login:*)",
+      "Bash(docker push:*)",
+      "Bash(docker run:*)"
+    ],
+    "deny": [
+      "Read(./.env)",
+      "Read(./**/.env)",
+      "Read(./.env.local)",
+      "Read(./.env.production)",
+      "Read(./secrets/**)",
+      "Read(./**/secrets/**)",
+      "Read(./data/**)",
+      "Read(./**/*.sqlite3)",
+      "Read(./**/*.sqlite3-*)",
+      "Read(./**/*.db)",
+      "Read(./**/backups/**)",
+      "Read(./**/*token*.txt)",
+      "Read(./**/*.pem)",
+      "Read(./**/*.key)",
+      "Bash(git push --force:*)",
+      "Bash(git push -f:*)",
+      "Bash(git push --force-with-lease:*)",
+      "Bash(pip install:*)",
+      "Bash(uv pip install:*)",
+      "Bash(npm install:*)",
+      "Bash(npx:*)",
+      "Bash(pipx:*)",
+      "Bash(uvx:*)",
+      "WebFetch(domain:api.monobank.ua)",
+      "WebFetch(domain:api.telegram.org)"
+    ]
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash|PowerShell",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 \"$CLAUDE_PROJECT_DIR/.claude/hooks/guard_bash.py\"",
+            "timeout": 120
+          }
+        ]
+      }
+    ]
+  }
+}

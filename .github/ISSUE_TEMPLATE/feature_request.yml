@@ -1,0 +1,23 @@
+name: 💡 Ідея / Feature request
+description: Запропонуйте покращення / Suggest an improvement
+labels: [enhancement]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Яку проблему це вирішує? / What problem does it solve?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Пропозиція / Proposal
+    validations:
+      required: true
+  - type: checkboxes
+    id: privacy
+    attributes:
+      label: Приватність / Privacy
+      options:
+        - label: Я не додав(-ла) токен, виписки чи інші особисті фінансові дані. / I did not include my token, statements or other personal financial data.
+          required: true

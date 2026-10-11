@@ -1,0 +1,5 @@
+blank_issues_enabled: false
+contact_links:
+  - name: 🔒 Повідомити про вразливість (приватно) / Report a vulnerability
+    url: https://github.com/25LioN52/MonoBudget-telegram/security/advisories/new
+    about: Не створюйте публічний issue для проблем безпеки. / Do not open public issues for security problems.

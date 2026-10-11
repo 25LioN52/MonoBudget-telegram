@@ -1,0 +1,114 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+  workflow_call: # release.yml runs the full suite before publishing
+
+# Least privilege: jobs can only read the repository.
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: test
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884 # v10.3.0
+        with:
+          version: "0.12.7"
+          python-version: "3.13"
+          enable-cache: false
+      - name: Lockfile is up to date
+        run: uv lock --check
+      - name: Install locked dependencies
+        run: uv sync --frozen
+      - name: Lint
+        run: |
+          uv run ruff check .
+          uv run ruff format --check .
+      - name: Tests
+        run: uv run pytest
+
+  audit:
+    name: audit
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884 # v10.3.0
+        with:
+          version: "0.12.7"
+          python-version: "3.13"
+          enable-cache: false
+      - name: Known vulnerabilities in runtime dependencies (pip-audit)
+        run: |
+          uv sync --frozen
+          uv export --frozen --no-dev --no-emit-project --format requirements-txt > requirements-runtime.txt
+          uv run pip-audit --strict --require-hashes --disable-pip -r requirements-runtime.txt
+
+  secret-scan:
+    name: secret-scan
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Repository scanner — working tree
+        run: |
+          python3 scripts/secret_scan.py --all | tee scan.log
+          grep -q '^secret-scan: OK' scan.log
+      - name: Repository scanner — every commit and commit message
+        run: |
+          python3 scripts/secret_scan.py --history --all | tee history.log
+          grep -q '^secret-scan: OK' history.log
+      - name: TruffleHog (independent scanner, pushed commits)
+        uses: trufflesecurity/trufflehog@e76dff8a7e57d6df0c60ad8cbf5d5cba505a8fc9 # v3.99.2
+        with:
+          version: 3.99.2
+          extra_args: --results=verified,unknown
+
+  docker:
+    name: docker
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Build image (not pushed)
+        run: docker build --pull -t monobudget-telegram:ci .
+      - name: Smoke test (no real secrets, no network calls to Telegram/Monobank)
+        run: |
+          set -eu
+          img=monobudget-telegram:ci
+          fail() { echo "::error::$1"; exit 1; }
+          test "$(docker run --rm --entrypoint id "$img" -u)" = "10001" || fail "image must run as uid 10001"
+          if docker run --rm --entrypoint sh "$img" -c 'command -v pip || command -v uv'; then fail "no package manager at runtime"; fi
+          if docker run --rm --read-only "$img" check-config; then fail "missing config must be rejected"; fi
+          bot="123456789:$(head -c 35 /dev/zero | tr '\0' 'A')"
+          mono="fake$(head -c 40 /dev/zero | tr '\0' 'x')"
+          docker run --rm --read-only --cap-drop ALL --security-opt no-new-privileges:true \
+            -e ALLOWED_USER_IDS=111 -e TELEGRAM_BOT_TOKEN="$bot" -e MONO_TOKEN="$mono" "$img" check-config
+          if docker run --rm --read-only "$img" healthcheck; then fail "healthcheck must fail without a heartbeat"; fi
+      - name: Compose file is valid
+        run: |
+          mkdir -p secrets
+          cp example.env .env
+          printf 'x' > secrets/telegram_bot_token.txt
+          printf 'x' > secrets/mono_token.txt
+          docker compose config --quiet

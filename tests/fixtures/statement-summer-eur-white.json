@@ -1,0 +1,18 @@
+[
+  {
+    "id": "fakeTx0022",
+    "time": 1782810000,
+    "description": "Decathlon",
+    "mcc": 5941,
+    "originalMcc": 5941,
+    "hold": false,
+    "amount": -2599,
+    "operationAmount": -2599,
+    "currencyCode": 978,
+    "commissionRate": 0,
+    "cashbackAmount": 0,
+    "balance": 100000,
+    "comment": "",
+    "receiptId": ""
+  }
+]

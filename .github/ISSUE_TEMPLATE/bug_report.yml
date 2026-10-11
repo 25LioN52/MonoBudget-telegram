@@ -1,0 +1,47 @@
+name: 🐞 Помилка / Bug report
+description: Щось працює не так / Something doesn't work
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        > ⚠️ **Ніколи не вставляйте сюди токени (Monobank, Telegram), Telegram ID, виписки, IBAN, номери карток, вміст .env/secrets чи скриншоти з реальними сумами й описами операцій.** Issue публічні.
+        > **Never paste tokens (Monobank, Telegram), your Telegram id, statements, IBANs, card numbers, .env/secrets contents or screenshots with real transactions.** Issues are public.
+  - type: textarea
+    id: what
+    attributes:
+      label: Що сталося / What happened
+      description: Опишіть проблему і як її відтворити. / Describe the problem and how to reproduce it.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Що мало статися / Expected behaviour
+    validations:
+      required: true
+  - type: dropdown
+    id: where
+    attributes:
+      label: Де / Where
+      options:
+        - Закріплене повідомлення / Status message
+        - Звіти й операції / Reports & transactions
+        - Сповіщення / Notifications
+        - Синхронізація з Monobank / Monobank sync
+        - Docker / NAS
+        - Інше / Other
+    validations:
+      required: true
+  - type: input
+    id: versions
+    attributes:
+      label: Версії / Versions
+      description: Тег образу, ОС NAS / Image tag, NAS OS (наприклад / e.g. 1.0.0, UGOS Pro 1.x)
+  - type: checkboxes
+    id: privacy
+    attributes:
+      label: Приватність / Privacy
+      options:
+        - label: Я не додав(-ла) токени, Telegram ID, виписки чи інші особисті дані; логи переглянуто. / I did not include tokens, my Telegram id, statements or other personal data; logs were reviewed.
+          required: true
